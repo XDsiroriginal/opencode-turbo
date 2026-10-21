@@ -270,8 +270,8 @@ const plugin: Plugin = async (_input, options) => {
     config: async (cfg) => {
       if (!enabled) return
       const main = typeof cfg.model === "string" ? cfg.model : ""
-      if (!main) return
       const explicit = smallModel !== undefined && smallModel !== false
+      if (!main && !explicit) return
       if (!explicit && cfg.small_model && cfg.small_model !== main) return
       const target = smallModel === undefined ? DEFAULT_SMALL_MODEL : smallModel
       if (!target) return
@@ -279,8 +279,8 @@ const plugin: Plugin = async (_input, options) => {
       if (!explicit) {
         const baseURL = String(providers[main.split("/")[0] ?? ""]?.options?.baseURL ?? "")
         if (!/localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]/i.test(baseURL)) return
+        if (!providers[target.split("/")[0] ?? ""]) return
       }
-      if (!providers[target.split("/")[0] ?? ""]) return
       cfg.small_model = target
       if (metricsOn) metric({ type: "config", small_model: target, from: cfg.model })
     },
