@@ -92,13 +92,17 @@ function fits(text: string, limit: Budget) {
 function trustedPointer(text: string) {
   const raw = text.match(/Full output saved to: (.+)$/m)?.[1]?.trim()
   if (!raw) return undefined
-  const resolved = path.resolve(raw)
-  const root = path.resolve(OUTPUT_DIR)
-  const norm = process.platform === "win32" ? (p: string) => p.toLowerCase() : (p: string) => p
-  const f = norm(resolved)
-  const r = norm(root)
-  if (f !== r && !f.startsWith(r + path.sep)) return undefined
-  return resolved
+  try {
+    const resolved = fs.realpathSync(raw)
+    const root = fs.realpathSync(OUTPUT_DIR)
+    const norm = process.platform === "win32" ? (p: string) => p.toLowerCase() : (p: string) => p
+    const f = norm(resolved)
+    const r = norm(root)
+    if (f !== r && !f.startsWith(r + path.sep)) return undefined
+    return resolved
+  } catch {
+    return undefined
+  }
 }
 
 function isMetaLine(line: string) {
